@@ -8,7 +8,7 @@ from flask import Flask, render_template, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_FILE = BASE_DIR / "models" / "stress_model.joblib"
+MODEL_FILE = BASE_DIR / "Models" / "stress_model.joblib"
 
 app = Flask(__name__)
 
