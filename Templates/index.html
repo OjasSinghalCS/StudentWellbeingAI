@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An educational student lifestyle analysis and well-being project.">
+    <title>Student Well-being | Lifestyle Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .error-message {
+            padding: 14px 18px;
+            margin: 0 0 24px;
+            border: 1px solid #e8a5a5;
+            border-radius: 10px;
+            background: #fff0f0;
+            color: #8b2525;
+            line-height: 1.5;
+        }
+
+        .input-card input:focus-visible {
+            outline: 2px solid #8065d8;
+            outline-offset: 2px;
+        }
+
+        .primary-button:focus-visible,
+        .brand:focus-visible {
+            outline: 3px solid #8065d8;
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-icon">SW</span>
+            <span>Student Well-being</span>
+        </a>
+        <span class="topbar-label">AI PROJECT · CLASS XII</span>
+    </header>
+
+    <main class="page-container">
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="eyebrow">YOUR ROUTINE, UNDERSTOOD</span>
+                <h1>A little more insight into your everyday life.</h1>
+                <p>
+                    Explore how your daily routine compares with the dataset
+                    and see the category predicted by our experimental
+                    machine-learning model.
+                </p>
+                <div class="hero-note">
+                    <span class="note-dot"></span>
+                    Educational tool · Not a medical assessment
+                </div>
+            </div>
+
+            <div class="hero-art" aria-hidden="true">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-orbit orbit-two"></div>
+
+                <div class="art-card art-card-main">
+                    <span class="art-sun">✳</span>
+                    <span class="art-card-title">Small steps</span>
+                    <span class="art-card-subtitle">A more balanced day</span>
+                    <div class="art-bars">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="art-chip chip-top">Study</div>
+                <div class="art-chip chip-bottom">Rest</div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">01 / DAILY ROUTINE</span>
+                    <h2>Tell us about your day</h2>
+                    <p>
+                        Enter the approximate number of hours you spend
+                        on each activity per day.
+                    </p>
+                </div>
+                <span class="time-tag">5 inputs</span>
+            </div>
+
+            {% if error %}
+                <div class="error-message" role="alert">
+                    <strong>Check your entries</strong>
+                    <p>{{ error }}</p>
+                </div>
+            {% endif %}
+
+            <form action="{{ url_for('index') }}" method="POST" class="routine-form">
+                <div class="input-grid">
+                    {% for field in fields %}
+                        <div class="input-card">
+                            <label for="{{ field.name }}">
+                                {{ field.label }}
+                            </label>
+
+                            <div class="input-wrap">
+                                <input
+                                    type="number"
+                                    id="{{ field.name }}"
+                                    name="{{ field.name }}"
+                                    min="0"
+                                    max="24"
+                                    step="{{ field.step }}"
+                                    placeholder="{{ field.placeholder }}"
+                                    value="{{ form_data.get(field.name, '') }}"
+                                    required
+                                >
+                                <span class="input-unit">hrs/day</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-hint">
+                    <span class="hint-icon">i</span>
+                    Use realistic estimates. These five activities do not
+                    necessarily account for every hour in your day, but
+                    their combined total cannot exceed 24 hours.
+                </div>
+
+                <button type="submit" class="primary-button">
+                    Analyse my routine
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+        </section>
+
+        <section class="info-grid">
+            <article class="info-card">
+                <span class="info-number">01</span>
+                <h3>Machine learning</h3>
+                <p>
+                    A trained classifier predicts one of the categories
+                    represented in the training dataset.
+                </p>
+            </article>
+
+            <article class="info-card">
+                <span class="info-number">02</span>
+                <h3>Lifestyle insights</h3>
+                <p>
+                    Your entries are compared with reference averages
+                    calculated from the dataset.
+                </p>
+            </article>
+
+            <article class="info-card">
+                <span class="info-number">03</span>
+                <h3>Supportive ideas</h3>
+                <p>
+                    Receive general suggestions that may help you reflect
+                    on your daily routine.
+                </p>
+            </article>
+        </section>
+
+        <section class="disclaimer">
+            <strong>A note on responsible AI</strong>
+            <p>
+                This project predicts labels in a particular dataset.
+                Its output does not establish your actual stress level,
+                diagnose a condition, or replace professional guidance.
+                Your results depend on the patterns present in the
+                training data.
+            </p>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>Student Well-being &amp; Stress Monitoring System</span>
+        <span>Educational AI Project</span>
+    </footer>
+</body>
+</html>

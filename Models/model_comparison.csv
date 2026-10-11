@@ -1,0 +1,4 @@
+Model,Mean CV Macro F1,Standard Deviation
+Decision Tree,1.0,0.0
+Random Forest,1.0,0.0
+Logistic Regression,0.8211063395106487,0.016764063341746627

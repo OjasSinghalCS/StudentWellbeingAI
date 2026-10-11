@@ -1,0 +1,7 @@
+{
+    "selected_model": "Decision Tree",
+    "accuracy": 1.0,
+    "balanced_accuracy": 1.0,
+    "macro_f1": 1.0,
+    "test_rows": 400
+}

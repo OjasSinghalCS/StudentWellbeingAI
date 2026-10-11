@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Results | Student Well-being AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .result-page {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+            color: #243047;
+        }
+
+        .result-header {
+            margin-bottom: 24px;
+        }
+
+        .result-eyebrow {
+            margin: 0 0 7px;
+            color: #526b9b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .result-header h1 {
+            margin: 0 0 8px;
+            font-size: clamp(27px, 4vw, 36px);
+            line-height: 1.2;
+        }
+
+        .result-header p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 22px;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .prediction-card {
+            border-top: 4px solid #6478c8;
+            padding: 28px;
+        }
+
+        .section-label {
+            margin: 0 0 8px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .prediction-value {
+            margin: 0;
+            font-size: clamp(34px, 6vw, 48px);
+            line-height: 1.15;
+            font-weight: 750;
+            overflow-wrap: anywhere;
+        }
+
+        .prediction-description {
+            margin: 12px 0 0;
+            max-width: 720px;
+            color: #526174;
+            line-height: 1.7;
+        }
+
+        .result-disclaimer {
+            margin-top: 16px;
+            padding: 12px 14px;
+            background: #f4f6fb;
+            border-radius: 9px;
+            color: #526174;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .section-heading {
+            margin: 0 0 5px;
+            font-size: 21px;
+            line-height: 1.35;
+        }
+
+        .section-description {
+            margin: 0 0 20px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        .tracked-total {
+            margin: 14px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .routine-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .routine-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .routine-item:first-child {
+            padding-top: 0;
+        }
+
+        .routine-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .routine-name {
+            color: #526174;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .routine-value {
+            flex-shrink: 0;
+            font-size: 15px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .feedback-section {
+            margin-top: 4px;
+        }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .feedback-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #46556a;
+        }
+
+        .feedback-list li {
+            margin-bottom: 11px;
+            line-height: 1.65;
+        }
+
+        .feedback-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .empty-feedback {
+            margin: 0;
+            color: #526174;
+            line-height: 1.7;
+        }
+
+        .model-details {
+            margin-top: 8px;
+            padding: 18px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .model-details h2 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .model-details p {
+            margin: 6px 0;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .result-button {
+            display: inline-block;
+            padding: 11px 20px;
+            border: 1px solid #d7deea;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #334155;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .result-button:hover {
+            background: #f1f5f9;
+        }
+
+        @media (max-width: 760px) {
+            .result-grid,
+            .feedback-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-page {
+                padding: 20px 13px 30px;
+            }
+
+            .result-card,
+            .prediction-card {
+                padding: 19px;
+            }
+
+            .chart-container {
+                height: 260px;
+            }
+        }
+
+        @media print {
+            .result-actions {
+                display: none;
+            }
+
+            .result-page {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .result-card,
+            .model-details {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="result-page">
+
+        <header class="result-header">
+            <p class="result-eyebrow">Student Well-being Analysis</p>
+            <h1>Your Results</h1>
+            <p>
+                Review the model's prediction, your daily routine,
+                and the feedback based on your inputs.
+            </p>
+        </header>
+
+        <section class="result-card prediction-card">
+            <p class="section-label">Model-predicted stress category</p>
+
+            <h2 class="prediction-value">
+                {{ result.prediction }}
+            </h2>
+
+            <p class="prediction-description">
+                Based on the five lifestyle inputs you provided,
+                the model classified your routine into this category.
+            </p>
+
+            <div class="result-disclaimer">
+                <strong>Important:</strong> This is a prediction based on
+                patterns in the training dataset. It is not a diagnosis
+                or a definitive measurement of your actual stress level.
+            </div>
+        </section>
+
+        <section>
+            <div class="result-grid">
+
+                <article class="result-card">
+                    <h2 class="section-heading">Your Daily Routine</h2>
+                    <p class="section-description">
+                        Compare the number of hours entered for each activity.
+                        The graph scale adjusts automatically to your values.
+                    </p>
+
+                    <div class="chart-container" id="chartContainer">
+                        <canvas id="routineChart"
+                                aria-label="Bar chart of daily lifestyle hours"
+                                role="img"></canvas>
+                    </div>
+
+                    <p class="tracked-total">
+                        Total across the five recorded activities:
+                        <strong>{{ "%.1f"|format(result.total_hours) }} hours</strong>
+                    </p>
+                </article>
+
+                <article class="result-card">
+                    <h2 class="section-heading">Input Summary</h2>
+                    <p class="section-description">
+                        These are the values used to generate the prediction.
+                    </p>
+
+                    <div class="routine-list">
+                        {% for feature, value in result["inputs"].items() %}
+                        <div class="routine-item">
+                            <span class="routine-name">
+                                {% if feature == "Study_Hours_Per_Day" %}
+                                    Study
+                                {% elif feature == "Extracurricular_Hours_Per_Day" %}
+                                    Extracurricular activities
+                                {% elif feature == "Sleep_Hours_Per_Day" %}
+                                    Sleep
+                                {% elif feature == "Social_Hours_Per_Day" %}
+                                    Social activities
+                                {% elif feature == "Physical_Activity_Hours_Per_Day" %}
+                                    Physical activity
+                                {% else %}
+                                    {{ feature.replace("_", " ") }}
+                                {% endif %}
+                            </span>
+
+                            <span class="routine-value">
+                                {{ "%.1f"|format(value) }} hrs
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="feedback-section">
+            <h2 class="section-heading">Lifestyle Feedback</h2>
+            <p class="section-description">
+                This feedback is assessed separately from the model's
+                predicted category.
+            </p>
+
+            <div class="feedback-grid">
+
+                <article class="result-card">
+                    <h3 class="section-heading">Areas to Review</h3>
+                    <p class="section-description">
+                        Activities outside the dataset's reference ranges.
+                    </p>
+
+                    {% if result.insights %}
+                    <ul class="feedback-list">
+                        {% for insight in result.insights %}
+                        <li>{{ insight }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-feedback">
+                        No activities were flagged for additional review
+                        by the reference-range checks.
+                    </p>
+                    {% endif %}
+                </article>
+
+                <article class="result-card">
+                    <h3 class="section-heading">Suggestions</h3>
+                    <p class="section-description">
+                        General ideas for reviewing your daily routine.
+                    </p>
+
+                    {% if result.suggestions %}
+                    <ul class="feedback-list">
+                        {% for suggestion in result.suggestions %}
+                        <li>{{ suggestion }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-feedback">
+                        No additional suggestions were generated for these inputs.
+                    </p>
+                    {% endif %}
+                </article>
+
+            </div>
+        </section>
+
+        <section class="model-details">
+            <h2>About the Model</h2>
+            <p>
+                <strong>Classifier:</strong> {{ result.model_name }}
+            </p>
+            <p>
+                The model uses study hours, extracurricular hours, sleep,
+                social hours, and physical activity hours as its inputs.
+                It predicts a category learned from the dataset's
+                Stress_Level labels.
+            </p>
+            <p>
+                The lifestyle reference ranges and suggestions are separate
+                rule-based checks; they do not determine the model's prediction.
+                A predicted category should not be treated as a clinical
+                assessment of an individual's well-being.
+            </p>
+        </section>
+
+        <div class="result-actions">
+            <a href="{{ url_for('index') }}" class="result-button">
+                Analyse Another Routine
+            </a>
+
+            <button type="button"
+                    class="result-button"
+                    onclick="window.print()">
+                Print Results
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const routineData = {{ result["inputs"] | tojson }};
+
+        const activityNames = {
+            Study_Hours_Per_Day: "Study",
+            Extracurricular_Hours_Per_Day: "Extracurricular",
+            Sleep_Hours_Per_Day: "Sleep",
+            Social_Hours_Per_Day: "Social",
+            Physical_Activity_Hours_Per_Day: "Physical activity"
+        };
+
+        const entries = Object.entries(routineData);
+        const labels = entries.map(([key]) => activityNames[key] || key);
+        const values = entries.map(([, value]) => Number(value));
+
+        const canvas = document.getElementById("routineChart");
+
+        if (typeof Chart !== "undefined" && canvas && values.length > 0) {
+            const highestValue = Math.max(...values, 0);
+
+            // Add some headroom above the tallest bar.
+            const axisMaximum = Math.max(
+                2,
+                Math.ceil((highestValue * 1.15) / 2) * 2
+            );
+
+            const tickStep = axisMaximum <= 10
+                ? 2
+                : Math.ceil(axisMaximum / 5);
+
+            new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Hours per day",
+                        data: values,
+                        backgroundColor: [
+                            "#7188d8",
+                            "#73b9a2",
+                            "#e8b76b",
+                            "#a18bd4",
+                            "#70a9d5"
+                        ],
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 48
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1) + " hours";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 35,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: axisMaximum,
+                            ticks: {
+                                stepSize: tickStep,
+                                callback: function(value) {
+                                    return value + " h";
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: "Hours per day"
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (canvas) {
+            document.getElementById("chartContainer").innerHTML =
+                "<p class='empty-feedback'>The graph could not load. " +
+                "Your input summary is still available.</p>";
+        }
+    </script>
+</body>
+</html>
