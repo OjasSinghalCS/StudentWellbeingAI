@@ -4,7 +4,7 @@ from pathlib import Path
 import joblib
 import math
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -269,6 +269,62 @@ def index():
 
     return render_template("results.html", result=result)
 
+@app.route("/api/predict", methods=["POST"])
+def api_predict():
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "error": "Send the inputs as a JSON object."
+        }), 400
+
+    values = {}
+
+    try:
+        for field in FEATURES:
+            raw_value = data.get(field)
+
+            if raw_value is None or isinstance(raw_value, bool):
+                raise ValueError
+
+            value = float(raw_value)
+
+            if not math.isfinite(value) or not 0 <= value <= 24:
+                raise ValueError
+
+            values[field] = value
+
+    except (ValueError, TypeError, OverflowError):
+        return jsonify({
+            "error": (
+                "Enter a valid number between 0 and 24 "
+                "for every activity."
+            )
+        }), 400
+
+    total_hours = sum(values.values())
+
+    if total_hours > 24:
+        return jsonify({
+            "error": (
+                f"Your activities total {total_hours:.1f} hours. "
+                "The total cannot exceed 24 hours per day."
+            )
+        }), 400
+
+    input_data = pd.DataFrame([values], columns=FEATURES)
+    prediction = str(model.predict(input_data)[0]).title()
+
+    result = {
+        "prediction": prediction,
+        "inputs": values,
+        "insights": get_lifestyle_insights(values),
+        "suggestions": get_suggestions(values),
+        "model_name": MODEL_NAME,
+        "total_hours": round(total_hours, 1)
+    }
+
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(debug=False)
